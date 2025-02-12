@@ -367,9 +367,10 @@ func (driver *ftpDriver) getMinIOClient(ctx *ftp.Context) (*minio.Client, error)
 		}
 
 		return minio.New(driver.endpoint, &minio.Options{
-			Creds:     mcreds,
-			Secure:    globalIsTLS,
-			Transport: tr,
+			Creds:           mcreds,
+			Secure:          globalIsTLS,
+			Transport:       tr,
+			TrailingHeaders: true,
 		})
 	}
 
@@ -552,6 +553,7 @@ func (driver *ftpDriver) PutFile(ctx *ftp.Context, objPath string, data io.Reade
 	info, err := clnt.PutObject(context.Background(), bucket, object, data, -1, minio.PutObjectOptions{
 		ContentType:          mimedb.TypeByExtension(path.Ext(object)),
 		DisableContentSha256: true,
+		Checksum:             minio.ChecksumFullObjectCRC32C,
 	})
 	n = info.Size
 	return n, err
